@@ -1,0 +1,58 @@
+{
+  "keywords": [
+    "gradient descent",
+    "gradient descent architecture",
+    "gradient descent neural network",
+    "gradient descent algorithm",
+    "gd"
+  ],
+  "title": "Gradient Descent Architecture",
+  "description": "Gradient Descent is a method that finds the minimum value of a function by moving in the direction of the negative gradient (slope).",
+  "gradient_descent": {
+    "definition": "Gradient Descent is a method that finds the minimum value of a function by moving in the direction of the negative gradient (slope).",
+    "formula": {
+      "expression": "θ = θ - α ∇J(θ)",
+      "parameters": {
+        "theta": "Model parameters (weights)",
+        "alpha": "Learning rate",
+        "gradient": "Gradient of the cost function",
+        "video": "gradient descent (1).mp4"
+      }
+    },
+    "working_principle": [
+      "Start with initial values of parameters",
+      "Calculate the error (cost function)",
+      "Find the gradient (slope)",
+      "Update parameters using the formula",
+      "Repeat until error is minimized"
+    ],
+    "simple_idea": {
+      "positive_slope": "Move left",
+      "negative_slope": "Move right",
+      "goal": "Reach the minimum point"
+    },
+    "types": [
+      "Batch Gradient Descent",
+      "Stochastic Gradient Descent (SGD)",
+      "Mini-batch Gradient Descent"
+    ],
+    "applications": [
+      "Linear Regression",
+      "Logistic Regression",
+      "Neural Networks",
+      "Deep Learning"
+    ],
+    "summary": "Gradient Descent is an iterative method to reduce error by updating parameters in the direction of the steepest decrease."
+  },
+  "weighted_sum": {
+    "video": "gradient descent (2).mp4",
+    "description": "In most machine learning models, output is calculated using a weighted sum of inputs.",
+    "formula": "z = w1*x1 + w2*x2 + ... + wn*xn + b",
+    "components": {
+      "w": "Weights",
+      "x": "Inputs",
+      "b": "Bias",
+      "z": "Predicted output"
+    }
+  }
+}

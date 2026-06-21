@@ -1,0 +1,45 @@
+{
+    "keywords": [
+        "cnn",
+        "cnn architecture",
+        "convolutional neural network"
+    ],
+    "title": "Convolutional Neural Network Architecture",
+    "description": "Convolutional Neural Network (CNN) Architecture — Detailed Explanation\n\nA Convolutional Neural Network (CNN) is a type of deep learning model mainly used for image processing, computer vision, and pattern recognition. CNNs automatically learn important features from images such as edges, shapes, textures, and objects.\n\nCNN architecture is built using several layers that process the image step-by-step.",
+    "steps": [
+        {
+            "step": 1,
+            "title": "Input Layer",
+            "explanation": "The input layer receives the image data. Images are represented as matrices of pixel values. For example, a colored image may have dimensions like 224 x 224 x 3 where 224 is height, 224 is width, and 3 represents RGB color channels.",
+            "video": "input.mp4"
+        },
+        {
+            "step": 2,
+            "title": "Convolution Layer & Activation Function (ReLU)",
+            "explanation": "The convolution layer applies filters (kernels) that slide across the image to detect features such as edges, textures, and shapes. Each filter produces a feature map that highlights a specific pattern in the image.After convolution, an activation function is applied to introduce non-linearity. The most commonly used activation function is ReLU (Rectified Linear Unit), which converts negative values to zero and keeps positive values unchanged",
+            "video": "convolution.mp4"
+        },
+        {
+            "step": 3,
+            "title": "Pooling Layer",
+            "explanation": "The pooling layer reduces the size of the feature maps while keeping the most important information. The most common type is max pooling, which selects the maximum value from each region of the feature map. This reduces computation and helps prevent overfitting.",
+            "video": "pooling.mp4"
+        },
+        {
+            "step": 4,
+            "title": "Flatten Layer",
+            "explanation": "The flatten layer converts the two-dimensional feature maps into a one-dimensional vector. This transformation allows the data to be processed by fully connected neural network layers.",
+            "video": "feature ..mp4"
+        },
+        {
+            "step": 6,
+            "title": "Fully Connected Layer",
+            "explanation": "The fully connected layer connects all neurons from the previous layer to the next layer. It learns complex relationships between features extracted by convolution layers and performs classification."
+        },
+        {
+            "step": 7,
+            "title": "Output Layer",
+            "explanation": "The output layer produces the final prediction. It usually uses the Softmax activation function to generate probability scores for each class. The class with the highest probability is selected as the final prediction."
+        }
+    ]
+}

@@ -1,0 +1,25 @@
+{
+  "topic": "Singular Value Decomposition (SVD)",
+  "keywords": [
+    "SVD",
+    "Matrix Factorization",
+    "Linear Algebra",
+    "Dimensionality Reduction",
+    "Eigenvalues",
+    "Machine Learning",
+    "Data Compression"
+  ],
+  "description": {
+    "short": "Singular Value Decomposition (SVD) is a matrix factorization technique used to decompose a matrix into three simpler matrices.",
+    "video": "svd.mp4",
+    "detailed": "Singular Value Decomposition (SVD) is a fundamental concept in linear algebra where a matrix A is decomposed into three matrices: U, Sigma (Σ), and V transpose (Vᵀ). It is widely used in machine learning, data compression, image processing, and recommendation systems. SVD helps in reducing dimensionality, removing noise, and extracting important features from data. The decomposition is represented as A = UΣVᵀ, where U and V are orthogonal matrices and Σ is a diagonal matrix containing singular values."
+  },
+  "formula": "A = U Σ Vᵀ",
+  "applications": [
+    "Dimensionality Reduction",
+    "Principal Component Analysis (PCA)",
+    "Image Compression",
+    "Recommender Systems",
+    "Noise Reduction"
+  ]
+}

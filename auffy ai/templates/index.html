@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruffy.ai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        :root {
+            --bg-sidebar: #f9f9f9;
+            --bg-main: #ffffff;
+            --text-primary: #0d0d0d;
+            --text-secondary: #676767;
+            --border-color: #e5e5e5;
+            --accent-color: #10a37f;
+            --input-bg: #f4f4f4;
+            --sidebar-width: 260px;
+        }
+
+        body.dark-mode {
+            --bg-sidebar: #202123;
+            --bg-main: #343541;
+            --text-primary: #ececf1;
+            --text-secondary: #acacbe;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent-color: #10a37f;
+            --input-bg: #40414f;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        aside {
+            width: var(--sidebar-width);
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            flex-shrink: 0;
+        }
+
+        .new-chat-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .new-chat-btn:hover {
+            background-color: #ececec;
+        }
+
+        .history-section {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .history-group {
+            margin-bottom: 20px;
+        }
+
+        .history-group-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 0 0 8px 12px;
+            text-transform: uppercase;
+        }
+
+        .history-item {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: 0.2s;
+        }
+
+        .history-item:hover,
+        .history-item.active {
+            background-color: #ececec;
+        }
+
+        body.dark-mode .history-item:hover,
+        body.dark-mode .history-item.active {
+            background-color: #2a2b32;
+        }
+
+        .sidebar-footer {
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .profile-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .profile-item:hover {
+            background-color: #ececec;
+        }
+
+        .avatar-circle {
+            width: 32px;
+            height: 32px;
+            background-color: #5436da;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        header {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-bottom: 150px;
+            /* Space for input bar */
+            scroll-behavior: smooth;
+        }
+
+        .message-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .message-wrapper.user {
+            background-color: transparent;
+        }
+
+        .message-wrapper.bot {
+            background-color: transparent;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .user .message-avatar {
+            background-color: #ececec;
+            color: var(--text-primary);
+        }
+
+        .bot .message-avatar {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .message-content {
+            flex-grow: 1;
+            line-height: 1.6;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        /* Bottom Input Area */
+        .input-outer-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(transparent, var(--bg-main) 50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-box {
+            max-width: 768px;
+            width: 100%;
+            background-color: var(--input-bg);
+            border-radius: 26px;
+            display: flex;
+            align-items: flex-end;
+            padding: 10px 14px 10px 18px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            transition: border-color 0.2s;
+        }
+
+        .input-box:focus-within {
+            border-color: #bbb;
+        }
+
+        .input-box textarea {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 8px 0;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: none;
+            max-height: 200px;
+            color: var(--text-primary);
+        }
+
+        .input-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: 0.2s;
+        }
+
+        .icon-btn:hover {
+            background-color: #e0e0e0;
+        }
+
+        .send-btn {
+            background-color: var(--text-primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+        }
+
+        .send-btn:disabled {
+            background-color: #d7d7d7;
+            cursor: default;
+        }
+
+        .footer-note {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        /* Mode Selector Button */
+        .mode-selector-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .mode-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .mode-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .mode-btn.mode-visual {
+            border-color: #7c3aed;
+            color: #7c3aed;
+            background: rgba(124,58,237,0.07);
+        }
+
+        .mode-btn.mode-imagegen {
+            border-color: #e85d04;
+            color: #e85d04;
+            background: rgba(232,93,4,0.07);
+        }
+
+        .mode-dropdown {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 0;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            overflow: hidden;
+            z-index: 100;
+            min-width: 180px;
+            display: none;
+            flex-direction: column;
+        }
+
+        .mode-dropdown.open {
+            display: flex;
+            animation: fadeInUp 0.15s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .mode-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background 0.15s;
+            color: var(--text-primary);
+            font-family: inherit;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .mode-option:hover {
+            background: var(--input-bg);
+        }
+
+        .mode-option.active-option {
+            font-weight: 600;
+        }
+
+        .mode-option-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ImageGen response cards */
+        .imagegen-card {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 12px;
+        }
+
+        .imagegen-card h2 {
+            margin: 0 0 12px;
+            font-size: 1.1rem;
+            color: #e85d04;
+        }
+
+        .imagegen-card .ig-content {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .imagegen-card .mermaid-wrap {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            overflow-x: auto;
+        }
+
+        body.dark-mode .imagegen-card .mermaid-wrap {
+            background: #1a1a2e;
+        }
+
+        .imagegen-card .steps-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .imagegen-card .steps-list li {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .imagegen-card .steps-list li:last-child {
+            border-bottom: none;
+        }
+
+        .step-num {
+            background: #e85d04;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .imagegen-card canvas {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .imagegen-card img.ig-image {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .ig-image-loading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            padding: 12px 0;
+        }
+
+        /* Typing Indicator */
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            padding: 10px 0;
+        }
+
+        .login-logo {
+            width: 350px;
+            margin-bottom: 2rem;
+            object-fit: contain;
+        }
+
+        .sidebar-logo-container {
+            padding: 16px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .sidebar-logo {
+            height: 80px;
+            width: auto;
+            max-width: 220px;
+            object-fit: contain;
+            display: block;
+        }
+
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: #ddd;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-6px);
+            }
+        }
+
+        /* Video Step Redesign */
+        .video-step {
+            margin-top: 15px;
+        }
+
+        .video-step h3 {
+            color: var(--accent-color);
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .video-step video {
+            width: 100%;
+            border-radius: 12px;
+            background: #000;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            aside {
+                display: none;
+            }
+        }
+
+        /* Login Modal */
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 40px 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+        }
+
+        /* Intro Video Overlay */
+        #introOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease;
+        }
+
+        #introVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="introOverlay">
+        <video id="introVideo" autoplay muted playsinline preload="auto">
+            <source src="intro.mp4" type="video/mp4" onerror="document.getElementById('introVideo').dispatchEvent(new Event('error'))">
+        </video>
+    </div>
+
+    <div id="loginOverlay">
+        <div class="login-card">
+            <img src="logo.png" alt="Ruffy.ai" class="login-logo"
+                onerror="this.onerror=null; this.src=''; this.alt='Ruffy.ai'">
+            <h2 style="margin-bottom: 0.5rem;">Welcome to Ruffy.ai</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Please sign in to continue</p>
+
+            <!-- Google Sign-In HTML API -->
+            <div id="g_id_onload"
+                data-client_id="734218561972-jlkcf7op0cvp13j0hijck0oq0a27gd55.apps.googleusercontent.com"
+                data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
+                data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
+                data-text="signin_with" data-size="large" data-logo_alignment="left">
+            </div>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 10px;">Testing without a
+                    Client ID?</p>
+                <button onclick="continueAsGuest()"
+                    style="padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); cursor: pointer; font-weight: 500; font-family: inherit;">Continue
+                    as Guest</button>
+            </div>
+
+            <!-- Google Login configured -->
+        </div>
+    </div>
+
+    <aside>
+        <div class="sidebar-logo-container">
+            <img src="logo.png" alt="Ruffy.ai Logo" class="sidebar-logo">
+        </div>
+        <button class="new-chat-btn" onclick="startNewChat()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            New Chat
+        </button>
+
+        <div class="history-section" id="sidebarHistory">
+            <div class="history-group">
+                <div class="history-group-title">Today</div>
+                <div id="historyList">
+                    <!-- History items -->
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="profile-item" id="userProfileInfo">
+                <div class="avatar-circle" id="userAvatar">U</div>
+                <div style="font-size: 0.9rem; font-weight: 500;" id="userName">User Profile</div>
+            </div>
+        </div>
+        <div class="profile-item" style="margin-top: 5px;" onclick="signOut()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <div style="font-size: 0.9rem; font-weight: 500;">Sign Out</div>
+        </div>
+        </div>
+    </aside>
+
+    <main>
+        <header>
+            <div class="logo-container">
+                <!-- Logo moved to sidebar -->
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <button class="icon-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+                    <svg id="sunIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg id="moonIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" style="display: none;">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="message-wrapper bot">
+                <div class="message-content">
+                    Hello! I'm Ruffy.ai . How can I help you today?
+                </div>
+            </div>
+        </div>
+
+        <div class="input-outer-container">
+            <div class="input-box">
+                <!-- Mode Selector -->
+                <div class="mode-selector-wrap" id="modeSelectorWrap">
+                    <div class="mode-dropdown" id="modeDropdown">
+                        <button class="mode-option" data-mode="normal" id="optNormal">
+                            <span class="mode-option-dot" style="background:#10a37f"></span>
+                            Normal
+                        </button>
+                        <button class="mode-option" data-mode="visual" id="optVisual">
+                            <span class="mode-option-dot" style="background:#7c3aed"></span>
+                            Visual Mode
+                        </button>
+                        <button class="mode-option" data-mode="imagegen" id="optImagegen">
+                            <span class="mode-option-dot" style="background:#e85d04"></span>
+                            ImageGen
+                        </button>
+                    </div>
+                    <button class="mode-btn" id="modeSelectorBtn" title="Select Mode">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                        </svg>
+                        <span id="modeLabelText">Normal</span>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="18 15 12 9 6 15"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <textarea id="userInput" placeholder="Ask anything" rows="1"
+                    oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
+                <div class="input-actions">
+                    <button class="send-btn" id="sendBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="3">
+                            <line x1="12" y1="19" x2="12" y2="5"></line>
+                            <polyline points="5 12 12 5 19 12"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="footer-note">
+                RuFf y can make mistakes. Check important info. <a href="#" style="color: inherit;">See Cookie
+                    Preferences</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        const historyList = document.getElementById('historyList');
+
+        // ─── Mode Selector Logic ───
+        let currentMode = 'normal'; // 'normal' | 'visual' | 'imagegen'
+        const modeSelectorBtn = document.getElementById('modeSelectorBtn');
+        const modeDropdown = document.getElementById('modeDropdown');
+        const modeLabelText = document.getElementById('modeLabelText');
+        const modeLabels = { normal: 'Normal', visual: 'Visual Mode', imagegen: 'ImageGen' };
+        const modeColors = { normal: '', visual: 'mode-visual', imagegen: 'mode-imagegen' };
+
+        modeSelectorBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            modeDropdown.classList.toggle('open');
+        });
+
+        document.addEventListener('click', () => modeDropdown.classList.remove('open'));
+
+        document.querySelectorAll('.mode-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentMode = btn.dataset.mode;
+                modeLabelText.textContent = modeLabels[currentMode];
+                // Style the button
+                modeSelectorBtn.className = 'mode-btn ' + (modeColors[currentMode] || '');
+                // Highlight active option
+                document.querySelectorAll('.mode-option').forEach(b => b.classList.remove('active-option'));
+                btn.classList.add('active-option');
+                modeDropdown.classList.remove('open');
+                // Update placeholder
+                const placeholders = {
+                    normal: 'Ask anything',
+                    visual: 'Ask a visual question (CNN, SVD...)',
+                    imagegen: 'Describe a diagram or image to generate...'
+                };
+                userInput.placeholder = placeholders[currentMode];
+            });
+        });
+
+        // Init Mermaid
+        mermaid.initialize({ startOnLoad: false, theme: 'default' });
+        let chartInstances = {};
+
+        async function renderImagegenResponse(data) {
+            const cardId = 'igcard_' + Date.now();
+            const canvasId = 'igchart_' + Date.now();
+            const mermaidId = 'igmermaid_' + Date.now();
+
+            let visualHtml = '';
+
+            if (data.type === 'diagram' && data.data && data.data.mermaid) {
+                visualHtml = `<div class="mermaid-wrap"><div class="mermaid" id="${mermaidId}">${data.data.mermaid}</div></div>`;
+            } else if (data.type === 'chart' && data.data) {
+                visualHtml = `<canvas id="${canvasId}" height="300"></canvas>`;
+            } else if (data.type === 'image' && data.data && data.data.image_url) {
+                visualHtml = `
+                    <div class="ig-image-loading">⏳ Generating image...</div>
+                    <img class="ig-image" src="${data.data.image_url}" alt="${data.title}" style="display:none" onload="this.previousElementSibling.remove(); this.style.display='block'" onerror="this.previousElementSibling.textContent='❌ Image generation failed.'">
+                `;
+            } else if (data.type === 'steps' && data.data && data.data.stepsArray) {
+                const stepsHtml = data.data.stepsArray.map((s, i) =>
+                    `<li><span class="step-num">${i+1}</span><span>${s}</span></li>`
+                ).join('');
+                visualHtml = `<ul class="steps-list">${stepsHtml}</ul>`;
+            }
+
+            const html = `
+                <div class="imagegen-card" id="${cardId}">
+                    <h2>✨ ${data.title || 'ImageGen Result'}</h2>
+                    <div class="ig-content">${marked.parse(data.content || '')}</div>
+                    ${visualHtml}
+                </div>
+            `;
+            appendMessage('bot', html);
+
+            // Render chart after DOM insert
+            if (data.type === 'chart' && data.data) {
+                const canvas = document.getElementById(canvasId);
+                if (canvas) {
+                    new Chart(canvas, {
+                        type: data.data.type || 'bar',
+                        data: {
+                            labels: data.data.labels || [],
+                            datasets: data.data.datasets || []
+                        },
+                        options: { responsive: true, plugins: { legend: { position: 'top' } } }
+                    });
+                }
+            }
+
+            // Render mermaid after DOM insert
+            if (data.type === 'diagram' && data.data && data.data.mermaid) {
+                try {
+                    const el = document.getElementById(mermaidId);
+                    if (el) {
+                        const { svg } = await mermaid.render('mermaid_render_' + Date.now(), data.data.mermaid);
+                        el.innerHTML = svg;
+                    }
+                } catch(e) {
+                    const el = document.getElementById(mermaidId);
+                    if (el) el.innerHTML = `<pre>${data.data.mermaid}</pre>`;
+                }
+            }
+        }
+
+        // Theme switching logic - resets to light on each page load
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            } else {
+                document.body.classList.remove('dark-mode');
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            }
+        }
+
+        // Always start in light mode each visit
+        applyTheme('light');
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.body.classList.toggle('dark-mode');
+            const theme = isDark ? 'dark' : 'light';
+            applyTheme(theme);
+        });
+
+        let currentUser = null;
+        let currentChatId = localStorage.getItem('currentChatId') || 'default';
+
+        function parseJwt(token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        function handleCredentialResponse(response) {
+            const data = parseJwt(response.credential);
+            currentUser = {
+                id: data.sub,
+                name: data.name,
+                email: data.email,
+                picture: data.picture
+            };
+
+            document.getElementById('userName').textContent = currentUser.name;
+            if (currentUser.picture) {
+                document.getElementById('userAvatar').innerHTML = `<img src="${currentUser.picture}" style="width:100%; height:100%; border-radius:50%">`;
+            } else {
+                document.getElementById('userAvatar').textContent = currentUser.name.charAt(0);
+            }
+
+            // Show app, hide login
+            document.getElementById('loginOverlay').style.display = 'none';
+            loadHistory();
+            loadHistorySidebar();
+        }
+
+        function continueAsGuest() {
+            currentUser = {
+                id: 'guest_user',
+                name: 'Guest',
+                email: 'guest@example.com',
+                picture: null
+            };
+
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userAvatar').textContent = 'G';
+
+            // Show app, hide login
+            document.getElementById('loginOverlay').style.display = 'none';
+            loadHistory();
+            loadHistorySidebar();
+        }
+
+        // Intro and Login flow
+        window.addEventListener('DOMContentLoaded', () => {
+            const introOverlay = document.getElementById('introOverlay');
+            const introVideo = document.getElementById('introVideo');
+            const loginOverlay = document.getElementById('loginOverlay');
+
+            const endIntro = () => {
+                introOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    introOverlay.style.display = 'none';
+                    if (!currentUser) {
+                        loginOverlay.style.display = 'flex';
+                    }
+                }, 800);
+            };
+
+            const checkProgress = setInterval(() => {
+                if (introVideo.currentTime > 0 && !introVideo.paused && !introVideo.ended) {
+                    clearInterval(checkProgress);
+                    // Video is definitely playing - we can wait for onended
+                }
+            }, 500);
+
+            introVideo.onended = endIntro;
+            introVideo.onerror = endIntro;
+
+            // Attempt explicit play just in case
+            introVideo.play().catch(() => {
+                // Autoplay blocked - proceed to login faster
+                setTimeout(endIntro, 1000);
+            });
+
+            // Fallback: end intro after 15 seconds to avoid getting stuck
+            setTimeout(() => {
+                clearInterval(checkProgress);
+                endIntro();
+            }, 15000);
+        });
+
+        function signOut() {
+            currentUser = null;
+            document.getElementById('loginOverlay').style.display = 'flex';
+            chatContainer.innerHTML = '';
+            historyList.innerHTML = '';
+        }
+
+        async function startNewChat() {
+            if (!currentUser) return;
+            currentChatId = Date.now().toString();
+            localStorage.setItem('currentChatId', currentChatId);
+            chatContainer.innerHTML = '';
+            appendMessage('bot', "Hello! I'm Ruffy.ai . How can I help you today?");
+            loadHistorySidebar();
+        }
+
+        async function deleteHistory() {
+            if (!currentUser) return;
+            if (confirm("Are you sure you want to permanently delete ALL your chat history?")) {
+                await fetch('/api/history?user_id=' + encodeURIComponent(currentUser.id) + '&delete_all=true', { method: 'DELETE' });
+                currentChatId = 'default';
+                localStorage.setItem('currentChatId', currentChatId);
+                chatContainer.innerHTML = '';
+                appendMessage('bot', "Your history has been completely deleted.");
+                loadHistorySidebar();
+            }
+        }
+
+        function appendMessage(sender, htmlContent) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper ${sender}`;
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.innerHTML = htmlContent;
+
+            wrapper.appendChild(content);
+            chatContainer.appendChild(wrapper);
+
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 50);
+        }
+
+        function showTyping() {
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper bot typing`;
+            wrapper.id = 'typingIndicator';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.innerHTML = `
+                <div class="typing-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            `;
+
+            wrapper.appendChild(content);
+            chatContainer.appendChild(wrapper);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function hideTyping() {
+            const el = document.getElementById('typingIndicator');
+            if (el) el.remove();
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text || !currentUser) return;
+
+            appendMessage('user', marked.parse(text));
+            userInput.value = '';
+            userInput.style.height = '';
+            showTyping();
+
+            try {
+                // ImageGen Mode
+                if (currentMode === 'imagegen') {
+                    const res = await fetch('/imagegen', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: text })
+                    });
+                    const data = await res.json();
+                    hideTyping();
+                    if (data.error) {
+                        appendMessage('bot', `<span style="color:#ff6b6b">Error: ${data.error}</span>`);
+                        return;
+                    }
+                    await renderImagegenResponse(data);
+                    return;
+                }
+
+                // Normal / Visual Mode
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        user_id: currentUser.id,
+                        chat_id: currentChatId,
+                        visual_mode: currentMode === 'visual'
+                    })
+                });
+
+                const data = await res.json();
+                hideTyping();
+
+                if (data.error) {
+                    appendMessage('bot', `<span style="color:#ff6b6b">Error: ${data.error}</span>`);
+                    return;
+                }
+
+                if (data.type === 'text') {
+                    appendMessage('bot', marked.parse(data.response));
+                } else if (data.type === 'visual') {
+                    let html = `<h2 style="color:var(--accent-color)">${data.title}</h2><p>${marked.parse(data.description)}</p>`;
+
+                    if (data.video) {
+                        html += `
+                            <div class="video-step">
+                                <video autoplay loop muted controls style="width:100%; border-radius:12px; margin-top:10px;">
+                                    <source src="/videos/${encodeURIComponent(data.video)}" type="video/mp4">
+                                </video>
+                            </div>
+                        `;
+                    }
+
+                    if (data.steps && data.steps.length > 0) {
+                        data.steps.forEach(step => {
+                            html += `
+                                <div class="video-step">
+                                    <h3>Step ${step.step}: ${step.title}</h3>
+                                    <p>${step.explanation}</p>
+                                    ${step.video ? `<video autoplay loop muted controls><source src="/videos/${encodeURIComponent(step.video)}" type="video/mp4"></video>` : ''}
+                                </div>
+                            `;
+                        });
+                    }
+                    appendMessage('bot', html);
+                }
+                loadHistorySidebar(); // Refresh sidebar history
+            } catch (err) {
+                hideTyping();
+                appendMessage('bot', `<span style="color:#ff6b6b">Error: ${err.message}</span>`);
+            }
+        }
+
+        async function loadHistory() {
+            if (!currentUser) return;
+            try {
+                const res = await fetch('/api/history?user_id=' + encodeURIComponent(currentUser.id) + '&chat_id=' + encodeURIComponent(currentChatId));
+                const data = await res.json();
+                chatContainer.innerHTML = '';
+                if (data.history && data.history.length > 0) {
+                    data.history.forEach(item => {
+                        const sender = item.role === 'user' ? 'user' : 'bot';
+                        appendMessage(sender, marked.parse(item.parts.join(" ")));
+                    });
+                } else {
+                    appendMessage('bot', "Hello! I'm Ruffy.ai . How can I help you today?");
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadHistorySidebar() {
+            if (!currentUser) return;
+            try {
+                const res = await fetch('/api/history?user_id=' + encodeURIComponent(currentUser.id));
+                const data = await res.json();
+                historyList.innerHTML = '';
+                if (data.chats) {
+                    data.chats.forEach(chat => {
+                        const div = document.createElement('div');
+                        div.className = 'history-item';
+                        div.textContent = chat.title;
+                        div.onclick = () => loadChat(chat.chat_id);
+                        if (chat.chat_id === currentChatId) {
+                            div.classList.add('active'); // CSS can highlight active chat
+                        }
+                        historyList.appendChild(div);
+                    });
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function loadChat(chatId) {
+            currentChatId = chatId;
+            localStorage.setItem('currentChatId', chatId);
+            loadHistory();
+            loadHistorySidebar();
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Removed DOMContentLoaded loadHistory calls since they run after login now
+    </script>
+</body>
+
+</html>

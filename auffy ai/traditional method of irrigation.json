@@ -1,0 +1,67 @@
+{
+  "title": "Traditional Irrigation Methods",
+  "description": "Traditional irrigation methods are simple, low-cost techniques used by farmers before modern irrigation systems. These methods depend on human or animal power and natural water sources like wells, ponds, and rivers.",
+  "video": "irrigation.mp4",
+  "keywords": [
+    "traditional irrigation",
+    "irrigation methods",
+    "moat",
+    "dhekli",
+    "chain pump",
+    "rahat",
+    "traditional method"
+  ],
+  "methods": [
+    {
+      "name": "Moat (Pulley System)",
+      "description": "Water is drawn from wells using a rope and bucket. It is pulled manually or with the help of animals.",
+      "keywords": [
+        "pulley",
+        "rope",
+        "bucket",
+        "manual effort"
+      ]
+    },
+    {
+      "name": "Dhekli",
+      "description": "A long wooden lever system used to lift water. One side has a bucket, and the other acts as a counterweight. Requires less effort compared to the moat system.",
+      "keywords": [
+        "lever system",
+        "counterweight",
+        "manual lifting"
+      ]
+    },
+    {
+      "name": "Chain Pump",
+      "description": "Consists of a rotating chain with small buckets attached. Buckets lift water continuously from the source. Can be operated manually or by animals.",
+      "keywords": [
+        "rotating chain",
+        "continuous flow",
+        "buckets"
+      ]
+    },
+    {
+      "name": "Rahat (Persian Wheel)",
+      "description": "A large wheel with buckets attached around it. Operated by animals like oxen. Provides continuous water supply to fields.",
+      "keywords": [
+        "Persian wheel",
+        "animal power",
+        "continuous irrigation"
+      ]
+    }
+  ],
+  "features": [
+    "Low cost and easy to construct",
+    "Requires human or animal labor",
+    "Suitable for small-scale farming",
+    "Environment-friendly",
+    "Less efficient compared to modern methods"
+  ],
+  "limitations": [
+    "Time-consuming",
+    "Requires more labor",
+    "Limited water supply",
+    "Not suitable for large farms"
+  ],
+  "conclusion": "Traditional irrigation methods played an important role in early agriculture and are still used in rural areas where modern irrigation facilities are not available."
+}
